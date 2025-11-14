@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title></title>
+    <style>
+        /* 这里放入之前提供的完整CSS代码 */
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1></h1>
+        <p></p>
+        <div class="timer"> <span id="time"></span> </div>
+        <div style="margin-top: 20px;">
+            <button onclick="startPopups()"></button>
+            <button onclick="stopPopups()"></button>
+            <button onclick="resetPopups()"></button>
+        </div>
+        <div id="debug-info" style="margin-top: 20px; font-size: 12px; color: #666;"></div>
+    </div>
+
+    <script>
+        // 这里放入之前提供的完整JavaScript代码
+        
+        // 添加调试功能
+        let debugMode = true;
+        let popupCount = 0;
+        
+        function logDebug(message) {
+            if (debugMode) {
+                console.log(`[调试] ${message}`);
+                const debugInfo = document.getElementById('debug-info');
+                debugInfo.innerHTML = ``;
+            }
+        }
+        
+        // 修改createPopup函数，添加调试信息
+        function createPopup() {
+            if (!popupActive) return;
+            
+            // 如果所有消息都已使用，重置
+            if (availableMessages.length === 0) {
+                availableMessages = [...warmMessages];
+                usedMessages.clear();
+                logDebug("");
+            }
+            
+            // 随机选择未使用的消息
+            const randomIndex = Math.floor(Math.random() * availableMessages.length);
+            const message = availableMessages[randomIndex];
+            availableMessages.splice(randomIndex, 1);
+            usedMessages.add(message);
+            
+            // 创建便签元素
+            const note = document.createElement('div');
+            note.className = `note ${colorClasses[Math.floor(Math.random() * colorClasses.length)]}`;
+            note.textContent = message;
+            
+            // 随机设置位置
+            const maxX = window.innerWidth - 200;
+            const maxY = window.innerHeight - 150;
+            const x = Math.max(20, Math.floor(Math.random() * maxX));
+            const y = Math.max(20, Math.floor(Math.random() * maxY));
+            
+            note.style.left = `${x}px`;
+            note.style.top = `${y}px`;
+            
+            document.body.appendChild(note);
+            popupCount++;
+            logDebug(`创建了第${popupCount}个弹窗: "${message.substring(0, 10)}..."`);
+            
+            // 随机显示时间 (2-5秒)
+            const displayTime = 2000 + Math.random() * 3000;
+            
+            // 设置自动消失
+            setTimeout(() => {
+                note.style.animation = 'fadeOut 0.5s ease-out';
+                setTimeout(() => {
+                    if (note.parentNode) {
+                        note.parentNode.removeChild(note);
+                        logDebug(``);
+                    }
+                }, 500);
+            }, displayTime);
+        }
+        
+        // 手动控制函数
+        function stopPopups() {
+            popupActive = false;
+            logDebug("");
+        }
+        
+        function resetPopups() {
+            popupActive = true;
+            timeLeft = 30;
+            document.getElementById('time').textContent = timeLeft;
+            availableMessages = [...warmMessages];
+            usedMessages.clear();
+            popupCount = 0;
+            logDebug("");
+        }
+        
+        // 页面加载后开始
+        window.onload = function() {
+            logDebug("");
+            setTimeout(startPopups, 1000); // 延迟1秒开始
+        };
+    </script>
+</body>
+</html>
